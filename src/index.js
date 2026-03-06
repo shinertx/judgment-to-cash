@@ -1,179 +1,163 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
+const fs = require('fs');
 const path = require('path');
 
+const {
+  PLATFORM_CONFIG,
+  buildCaseResponse,
+  buildTimeline,
+  createCaseRecord,
+} = require('./recovery-engine');
+const {
+  DEFAULT_CASES_PATH,
+  createFileStore,
+  createMemoryStore,
+} = require('./case-store');
+
 const DEFAULT_PORT = Number(process.env.PORT) || 4040;
+const DEFAULT_UPLOADS_PATH = path.join(__dirname, '../uploads');
 
-function createApp() {
+function updateCaseState(caseRecord, nextState) {
+  caseRecord.currentState = nextState;
+  caseRecord.timeline = buildTimeline(nextState);
+  caseRecord.updatedAt = new Date().toISOString();
+  return caseRecord;
+}
+
+function createApp(options = {}) {
   const app = express();
+  fs.mkdirSync(DEFAULT_UPLOADS_PATH, { recursive: true });
 
-  // Middleware
+  const upload = multer({ dest: DEFAULT_UPLOADS_PATH });
+  const store = options.store || createMemoryStore(options.initialCases);
+  const now = options.now || (() => new Date());
+
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
-  // Serve static landing page
   app.use(express.static(path.join(__dirname, '../landing')));
 
-  // Multer for mock file uploads
-  const upload = multer({ dest: 'uploads/' });
+  app.get('/api/config', (req, res) => {
+    res.json({
+      jurisdiction: PLATFORM_CONFIG.jurisdiction,
+      wedge: PLATFORM_CONFIG.wedge,
+      feeModel: PLATFORM_CONFIG.feeModel,
+      amountRange: PLATFORM_CONFIG.amountRange,
+      visibleStates: PLATFORM_CONFIG.visibleStates,
+    });
+  });
 
-  // In-memory mock database
-  const db = {
-    judgments: [],
-  };
-
-  // ==========================================
-  // 1) Intake + Assignment API
-  // ==========================================
   app.post('/api/intake', upload.single('judgmentPdf'), (req, res) => {
-    const { plaintiffName, defendantName, caseNumber } = req.body;
+    const caseRecord = createCaseRecord(req.body, {
+      now: now(),
+      uploadedFileName: req.file ? req.file.filename : null,
+    });
 
-    // Mock ingestion logic
-    const judgment = {
-      id: `JTC-${Date.now()}`,
-      plaintiffName: plaintiffName || 'Unknown Plaintiff',
-      defendantName: defendantName || 'Unknown Defendant',
-      caseNumber: caseNumber || `BEXAR-${Math.floor(Math.random() * 90000) + 10000}`,
-      status: 'Ingested',
-      standingConfirmed: true,
-      fileAssigned: true,
-      uploadedFile: req.file ? req.file.filename : null,
-      createdAt: new Date().toISOString()
-    };
-
-    db.judgments.push(judgment);
+    store.addCase(caseRecord);
 
     res.status(201).json({
-      message: 'Intake successful. File authorized with standing and permissions.',
-      judgment,
-      nextStep: 'Underwriting'
+      message: caseRecord.evaluation.headline,
+      case: buildCaseResponse(caseRecord),
     });
   });
 
-  // ==========================================
-  // 2) Judgment Underwriting Engine API
-  // ==========================================
-  app.post('/api/underwrite/:id', (req, res) => {
-    const { id } = req.params;
-    const judgment = db.judgments.find(j => j.id === id);
+  app.post('/api/cases/lookup', (req, res) => {
+    const caseId = typeof req.body.caseId === 'string' ? req.body.caseId.trim() : '';
+    const contactEmail = typeof req.body.contactEmail === 'string' ? req.body.contactEmail.trim() : '';
 
-    if (!judgment) {
-      return res.status(404).json({ error: 'Judgment not found' });
+    if (!caseId || !contactEmail) {
+      return res.status(400).json({ error: 'Case ID and email are required.' });
     }
 
-    // Mock Underwriting Logic based on requirements
-    const score = Math.floor(Math.random() * 100);
-    let recommendedPath = 'Skip / low yield';
-    let collectabilityEstimate = 'Low';
+    const caseRecord = store.findCaseByLookup(caseId, contactEmail);
 
-    if (score > 80) {
-      recommendedPath = 'Garnishment path';
-      collectabilityEstimate = 'High (Bank accounts likely)';
-    } else if (score > 50) {
-      recommendedPath = 'Discovery/subpoena path';
-      collectabilityEstimate = 'Medium (Bank unknown, asset clues exist)';
-    } else if (score > 30) {
-      recommendedPath = 'Lien path';
-      collectabilityEstimate = 'Low-Mid (Real property / UCC signals)';
+    if (!caseRecord) {
+      return res.status(404).json({ error: 'No case matched that Case ID and email.' });
     }
 
-    judgment.underwriting = {
-      recoveryScore: score,
-      collectabilityEstimate,
-      recommendedPath,
-      underwrittenAt: new Date().toISOString()
-    };
-    judgment.status = 'Underwritten';
-
-    res.json({
-      message: 'Underwriting complete',
-      actionPlan: judgment.underwriting
+    return res.json({
+      case: buildCaseResponse(caseRecord),
     });
   });
 
-  // ==========================================
-  // 3) Enforcement Automation Engine API
-  // ==========================================
-  app.post('/api/enforce/:id', (req, res) => {
-    const { id } = req.params;
-    const judgment = db.judgments.find(j => j.id === id);
+  app.get('/api/cases/:id', (req, res) => {
+    const caseRecord = store.findCaseByLookup(req.params.id, req.query.email);
 
-    if (!judgment) {
-      return res.status(404).json({ error: 'Judgment not found' });
+    if (!caseRecord) {
+      return res.status(404).json({ error: 'Case not found' });
     }
 
-    if (!judgment.underwriting) {
-      return res.status(400).json({ error: 'Judgment not yet underwritten' });
-    }
-
-    // Mock Enforcement / e-filing logic
-    judgment.enforcement = {
-      pathExecuted: judgment.underwriting.recommendedPath,
-      documentsGenerated: ['application.pdf', 'affidavit.pdf', 'exhibit_a.pdf'],
-      eFilingStatus: 'Submitted',
-      serviceCoordinated: true,
-      auditLog: [
-        { event: 'Documents Generated', timestamp: new Date().toISOString() },
-        { event: 'E-filed via EFSP API', timestamp: new Date().toISOString() }
-      ]
-    };
-    judgment.status = 'Enforcement Filed';
-
-    res.json({
-      message: `Enforcement pipeline triggered for ${judgment.enforcement.pathExecuted}`,
-      details: judgment.enforcement
+    return res.json({
+      case: buildCaseResponse(caseRecord),
     });
   });
 
-  // ==========================================
-  // 4 & 5) Ops & Plaintiff Dashboard APIs
-  // ==========================================
+  app.post('/api/cases/:id/start-recovery', (req, res) => {
+    const caseRecord = store.getCase(req.params.id);
+
+    if (!caseRecord) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    if (caseRecord.currentState !== 'Approved') {
+      return res.status(400).json({ error: 'Only approved cases can enter recovery.' });
+    }
+
+    updateCaseState(caseRecord, 'In Recovery');
+    caseRecord.recoveryStartedAt = now().toISOString();
+    store.saveCase(caseRecord);
+
+    return res.json({
+      message: 'Case moved into recovery.',
+      case: buildCaseResponse(caseRecord),
+    });
+  });
+
+  app.post('/api/cases/:id/mark-paid', (req, res) => {
+    const caseRecord = store.getCase(req.params.id);
+
+    if (!caseRecord) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+
+    updateCaseState(caseRecord, 'Paid');
+    caseRecord.paidAt = now().toISOString();
+    store.saveCase(caseRecord);
+
+    return res.json({
+      message: 'Case marked as paid.',
+      case: buildCaseResponse(caseRecord),
+    });
+  });
+
   app.get('/api/dashboard/ops', (req, res) => {
-    const exceptions = db.judgments.filter(j => j.status === 'Exception');
-    const activeQueues = db.judgments.filter(j => j.status !== 'Exception' && j.status !== 'Disbursed');
+    const cases = store.listCases();
+    const counts = PLATFORM_CONFIG.visibleStates.reduce((accumulator, state) => {
+      accumulator[state] = cases.filter((caseRecord) => caseRecord.currentState === state).length;
+      return accumulator;
+    }, {});
+
+    const approvedOrBetter = cases.filter((caseRecord) =>
+      ['Approved', 'In Recovery', 'Paid'].includes(caseRecord.currentState)
+    ).length;
 
     res.json({
       metrics: {
-        totalCases: db.judgments.length,
-        exceptionsQueueCount: exceptions.length,
-        activePipelines: activeQueues.length
+        totalCases: cases.length,
+        approvedRate: cases.length ? Math.round((approvedOrBetter / cases.length) * 100) : 0,
+        receivedCount: counts.Received || 0,
+        reviewingCount: counts.Reviewing || 0,
+        approvedCount: counts.Approved || 0,
+        inRecoveryCount: counts['In Recovery'] || 0,
+        paidCount: counts.Paid || 0,
+        closedCount: counts.Closed || 0,
       },
-      queues: {
-        exceptions,
-        active: activeQueues
-      }
+      cases: cases.map((caseRecord) => buildCaseResponse(caseRecord)),
     });
   });
 
-  app.get('/api/dashboard/plaintiff/:id', (req, res) => {
-    const { id } = req.params;
-    const judgment = db.judgments.find(j => j.id === id);
-
-    if (!judgment) {
-      return res.status(404).json({ error: 'Judgment not found' });
-    }
-
-    // Simple status + transparency
-    const statuses = ['Ingested', 'Underwritten', 'Enforcement Filed', 'Served', 'Frozen', 'Funds Received', 'Disbursed'];
-    const currentIndex = statuses.indexOf(judgment.status);
-
-    res.json({
-      id: judgment.id,
-      caseNumber: judgment.caseNumber,
-      currentStatus: judgment.status,
-      progress: `${Math.round(((currentIndex + 1) / statuses.length) * 100)}%`,
-      timeline: statuses.map((status, index) => ({
-        status,
-        completed: index <= currentIndex
-      }))
-    });
-  });
-
-  // ==========================================
-  // Health & Base Endpoints
-  // ==========================================
   app.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
@@ -182,7 +166,9 @@ function createApp() {
 }
 
 function startServer(port = DEFAULT_PORT) {
-  const app = createApp();
+  const app = createApp({
+    store: createFileStore(DEFAULT_CASES_PATH),
+  });
   return app.listen(port, () => {
     console.log(`Judgment-to-Cash MVP server running on port ${port}`);
   });

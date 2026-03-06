@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Judgment-to-Cash | You Already Won. Now Get Paid.</title>
-  <meta name="description" content="No recovery, no fee judgment recovery for final unpaid Bexar County judgments. Send your judgment for review, get a collectability assessment, and track the file from review to payment.">
+  <meta name="description" content="No recovery, no fee judgment recovery for final unpaid Bexar County default judgments. Send your judgment for review, get a collectability assessment, and track the file from review to payment.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,21 +17,24 @@
         <span class="brand-mark">J</span>
         <span class="brand-text">Judgment-to-Cash</span>
       </a>
-      <a href="#start" class="header-link">Send Your Judgment</a>
+      <div class="header-actions">
+        <a href="#track" class="header-link">Track Case</a>
+        <a href="#start" class="header-link header-link-primary">Start Review</a>
+      </div>
     </div>
   </header>
 
   <main class="hero">
     <div class="container hero-grid">
       <section class="hero-copy">
-        <p class="eyebrow">Final unpaid Bexar County judgments</p>
+        <p class="eyebrow">Final unpaid Bexar County default judgments</p>
         <h1>You already won. Now get paid.</h1>
-        <p class="hero-lead">Send your final judgment for review. We assess collectability, handle the recovery process with legal and collection partners, and you pay only if money is recovered.</p>
+        <p class="hero-lead">A judgment should be money, but most people never collect because enforcement is confusing and expensive. We review collectability, handle the recovery path with legal and collection partners, and you only pay if money is recovered.</p>
 
         <ul class="proof-list">
           <li>No recovery, no fee</li>
-          <li>Final judgments only</li>
-          <li>Bexar County only</li>
+          <li>30% only when money is recovered</li>
+          <li>Final default judgments only</li>
           <li>Track review to payment</li>
         </ul>
 
@@ -40,21 +43,21 @@
             <span class="step-number">1</span>
             <div>
               <h2>Send the judgment</h2>
-              <p>Case number or PDF.</p>
+              <p>Upload the judgment or start with the case number.</p>
             </div>
           </div>
           <div class="step">
             <span class="step-number">2</span>
             <div>
-              <h2>We review collectability</h2>
-              <p>We tell you if it looks worth pursuing.</p>
+              <h2>Get a collectability review</h2>
+              <p>We score the file and tell you if it looks worth pursuing.</p>
             </div>
           </div>
           <div class="step">
             <span class="step-number">3</span>
             <div>
-              <h2>We handle the recovery path</h2>
-              <p>You can track the file all the way through payment.</p>
+              <h2>We move the recovery path</h2>
+              <p>Approved files move into partner review and can be tracked all the way to payment.</p>
             </div>
           </div>
         </div>
@@ -63,38 +66,108 @@
       <aside id="start" class="form-panel">
         <p class="eyebrow">Start here</p>
         <h2>Send your judgment for review.</h2>
-        <p class="form-intro">If you have the judgment PDF, upload it. If not, start with the case number.</p>
+        <p class="form-intro">Tell us what you know. If the file is strong enough, we advance the recovery costs and move it forward.</p>
 
         <div class="mini-note">
-          <strong>What you get:</strong> a collectability review, a clear next step, and status updates from review to payment.
+          <strong>Current fee:</strong> 30% of recovered funds. We advance approved recovery costs and only get paid if money is recovered.
         </div>
 
         <form id="intake-form" class="intake-form">
-          <div class="form-group">
-            <label for="plaintiffName">Your Name</label>
-            <input type="text" id="plaintiffName" name="plaintiffName" placeholder="Jane Smith or Acme Supply Co." required>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="plaintiffName">Your Name</label>
+              <input type="text" id="plaintiffName" name="plaintiffName" placeholder="Jane Smith or Acme Supply Co." required>
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Email</label>
+              <input type="email" id="contactEmail" name="contactEmail" placeholder="you@example.com" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contactPhone">Phone (Optional)</label>
+              <input type="text" id="contactPhone" name="contactPhone" placeholder="(210) 555-0100">
+            </div>
+            <div class="form-group">
+              <label for="defendantName">Who Owes You</label>
+              <input type="text" id="defendantName" name="defendantName" placeholder="John Doe or Doe LLC" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="caseNumber">Bexar County Case Number</label>
+              <input type="text" id="caseNumber" name="caseNumber" placeholder="2026-CV-10001" required>
+            </div>
+            <div class="form-group">
+              <label for="county">County</label>
+              <input type="text" id="county" name="county" value="Bexar County" readonly>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="judgmentAmount">Judgment Amount</label>
+              <input type="text" id="judgmentAmount" name="judgmentAmount" placeholder="$25,000">
+            </div>
+            <div class="form-group">
+              <label for="judgmentDate">Judgment Date</label>
+              <input type="date" id="judgmentDate" name="judgmentDate">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="finalJudgmentConfirmed">Is this a final judgment?</label>
+              <select id="finalJudgmentConfirmed" name="finalJudgmentConfirmed" required>
+                <option value="">Select one</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="defaultJudgmentConfirmed">Was it default or uncontested?</label>
+              <select id="defaultJudgmentConfirmed" name="defaultJudgmentConfirmed" required>
+                <option value="">Select one</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="debtorAddress">Debtor Address (Optional)</label>
+              <input type="text" id="debtorAddress" name="debtorAddress" placeholder="123 Main St, San Antonio, TX">
+            </div>
+            <div class="form-group">
+              <label for="debtorBank">Known Bank (Optional)</label>
+              <input type="text" id="debtorBank" name="debtorBank" placeholder="Frost Bank">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="debtorEmployer">Known Employer (Optional)</label>
+              <input type="text" id="debtorEmployer" name="debtorEmployer" placeholder="Employer or business">
+            </div>
+            <div class="form-group">
+              <label for="judgmentPdf">Judgment PDF (Optional)</label>
+              <input type="file" id="judgmentPdf" name="judgmentPdf" accept=".pdf">
+              <span class="file-hint">No PDF yet? Start with the case number.</span>
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="defendantName">Who Owes You</label>
-            <input type="text" id="defendantName" name="defendantName" placeholder="John Doe or Doe LLC" required>
-          </div>
-
-          <div class="form-group">
-            <label for="caseNumber">Bexar County Case Number</label>
-            <input type="text" id="caseNumber" name="caseNumber" placeholder="2026-CV-10001" required>
-          </div>
-
-          <div class="form-group">
-            <label for="judgmentPdf">Judgment PDF (Optional)</label>
-            <input type="file" id="judgmentPdf" name="judgmentPdf" accept=".pdf">
-            <span class="file-hint">No PDF yet? Send the case number.</span>
+            <label for="knownInformation">Anything Else You Know</label>
+            <textarea id="knownInformation" name="knownInformation" rows="4" placeholder="Bank, address history, property, business information, payment history, or anything else that may help recovery."></textarea>
           </div>
 
           <div class="terms-box">
             <label class="checkbox-container">
               <input type="checkbox" required>
-              <span>I agree to review the contingency fee agreement and authorize an attorney-supervised recovery review.</span>
+              <span>I agree to review the 30% contingency fee agreement and authorize an attorney-supervised recovery review.</span>
             </label>
           </div>
 
@@ -102,9 +175,12 @@
         </form>
 
         <div id="successMessage" class="success-message hidden">
-          <div class="success-badge">Submitted</div>
-          <h2>We received your judgment.</h2>
-          <p>Next step: we review the file, decide whether it looks collectible, and tell you what comes next.</p>
+          <div class="success-badge" id="successBadge">Submitted</div>
+          <h2 id="successTitle">We received your judgment.</h2>
+          <p id="successBody">Next step: we review the file and tell you what comes next.</p>
+          <p class="case-id-line">Case ID: <strong id="successCaseId">JTC-0000</strong></p>
+          <ul id="successList" class="success-list"></ul>
+          <a href="#track" class="inline-link">Track this case later</a>
         </div>
       </aside>
     </div>
@@ -114,9 +190,9 @@
     <div class="container support-grid">
       <article class="support-card">
         <p class="eyebrow">Who this is for</p>
-        <h2>For individuals, landlords, and businesses with a final unpaid judgment.</h2>
+        <h2>Individuals, landlords, and small businesses with a final unpaid judgment.</h2>
         <ul class="detail-list">
-          <li>You already have a final Bexar County judgment.</li>
+          <li>You already won in court.</li>
           <li>The judgment has not been paid.</li>
           <li>You want help turning that judgment into a recovery path.</li>
         </ul>
@@ -124,9 +200,48 @@
 
       <article class="support-card support-card-contrast">
         <p class="eyebrow">Why people use this</p>
-        <h2>Traditional judgment collection can drag on for months or years.</h2>
-        <p>Most people do not want slow updates, unclear next steps, or upfront legal spend. They want to know if the judgment looks collectible and whether someone is actually moving it forward.</p>
+        <h2>Traditional collection can take months or years with little visibility.</h2>
+        <p>Most people do not want slow updates, unclear next steps, or more upfront legal spend. They want to know whether the judgment looks collectible and whether someone is actually moving it forward.</p>
       </article>
+    </div>
+  </section>
+
+  <section class="section" id="track">
+    <div class="container track-shell">
+      <div class="track-copy">
+        <p class="eyebrow">Track your case</p>
+        <h2>See exactly where your file stands.</h2>
+        <p>Use the Case ID from your intake confirmation and the same email you submitted. We keep the customer view simple: where the file is, what happens next, and whether anything is blocking progress.</p>
+      </div>
+
+      <div class="track-card">
+        <form id="lookup-form" class="track-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lookupCaseId">Case ID</label>
+              <input type="text" id="lookupCaseId" name="caseId" placeholder="JTC-2026-AB12CD34" required>
+            </div>
+            <div class="form-group">
+              <label for="lookupEmail">Email</label>
+              <input type="email" id="lookupEmail" name="contactEmail" placeholder="you@example.com" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-secondary" id="lookupBtn">Track My Case</button>
+        </form>
+
+        <div id="lookupResult" class="lookup-result hidden">
+          <div class="lookup-topline">
+            <div>
+              <p class="result-label" id="lookupState">Reviewing</p>
+              <h3 id="lookupHeadline">We found your file.</h3>
+            </div>
+            <p class="result-id" id="lookupCaseLabel">Case ID: JTC-2026-AB12CD34</p>
+          </div>
+          <p class="result-body" id="lookupNextStep">Next step: we are reviewing the file.</p>
+          <ul id="lookupTimeline" class="timeline-list"></ul>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -134,33 +249,37 @@
     <div class="container">
       <div class="section-head">
         <p class="eyebrow">Questions people ask</p>
-        <h2>Short answers before you send the file.</h2>
+        <h2>Short answers before you submit.</h2>
       </div>
 
       <div class="faq-grid">
         <article class="faq-item">
           <h3>What do you charge?</h3>
-          <p>For qualified done-for-you recoveries, the model is no recovery, no fee.</p>
+          <p>The current done-for-you fee is 30% of recovered funds. If no money is recovered, there is no recovery fee.</p>
+        </article>
+        <article class="faq-item">
+          <h3>Do I pay filing and recovery costs up front?</h3>
+          <p>No. On approved files, we advance the recovery costs.</p>
         </article>
         <article class="faq-item">
           <h3>Can I track the case?</h3>
-          <p>Yes. You can track the file from review to filing to payment.</p>
+          <p>Yes. You can follow the file from review to filing to payment.</p>
         </article>
         <article class="faq-item">
-          <h3>What if the judgment is not worth pursuing?</h3>
-          <p>We tell you early instead of letting the file drag on.</p>
+          <h3>How fast can it move?</h3>
+          <p>Approved files can move into partner review the same day. Recovery timing still depends on the court, debtor response, and available assets.</p>
         </article>
         <article class="faq-item">
           <h3>What judgments qualify?</h3>
-          <p>Final unpaid Bexar County judgments only.</p>
+          <p>Final unpaid Bexar County default or uncontested judgments within our current amount range.</p>
         </article>
         <article class="faq-item">
           <h3>Are you replacing my lawyer?</h3>
-          <p>No. Recovery is handled with legal and collection partners under attorney supervision.</p>
+          <p>No. Recovery is coordinated with legal and collection partners under attorney supervision where required.</p>
         </article>
         <article class="faq-item">
-          <h3>What do you need from me?</h3>
-          <p>The case number, party names, and the judgment PDF if you have it.</p>
+          <h3>What if the judgment is not a fit?</h3>
+          <p>We tell you early instead of letting the file drag on. If it is close but missing information, we ask for the most useful details next.</p>
         </article>
       </div>
     </div>
@@ -168,7 +287,7 @@
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>No recovery, no fee judgment recovery for final unpaid Bexar County judgments.</p>
+      <p>No recovery, no fee judgment recovery for final unpaid Bexar County default judgments.</p>
       <p>&copy; 2026 Judgment-to-Cash</p>
     </div>
   </footer>
