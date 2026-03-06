@@ -33,9 +33,10 @@
 
         <ul class="proof-list">
           <li>No recovery, no fee</li>
+          <li>No fee to submit</li>
           <li>We run the recovery process</li>
           <li>Final Bexar County defaults only</li>
-          <li>Track review to payment</li>
+          <li>Track progress</li>
         </ul>
 
         <div class="steps">
@@ -66,10 +67,10 @@
       <aside id="start" class="form-panel">
         <p class="eyebrow">Start here</p>
         <h2>Send your judgment for review.</h2>
-        <p class="form-intro">Upload the judgment, answer a few questions, and we will tell you whether it looks worth pursuing.</p>
+        <p class="form-intro">Upload the judgment, answer a few questions, and we will review it for free. If it looks like a fit, we send the agreement before anything moves forward.</p>
 
         <div class="mini-note">
-          <strong>Current fee:</strong> 30% of recovered funds. We advance approved recovery costs and only get paid if money is recovered.
+          <strong>No fee to submit.</strong> We review the judgment first. If we decide to take the case, we send the recovery agreement for review before anything moves forward. The standard fee is 30% of money recovered.
         </div>
 
         <form id="intake-form" class="intake-form">
@@ -138,42 +139,43 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="debtorAddress">Debtor Address (Optional)</label>
-              <input type="text" id="debtorAddress" name="debtorAddress" placeholder="123 Main St, San Antonio, TX">
-            </div>
-            <div class="form-group">
-              <label for="debtorBank">Known Bank (Optional)</label>
-              <input type="text" id="debtorBank" name="debtorBank" placeholder="Frost Bank">
-            </div>
-          </div>
+          <details class="extra-details">
+            <summary>Add more details that may help recovery (optional)</summary>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="debtorEmployer">Known Employer (Optional)</label>
-              <input type="text" id="debtorEmployer" name="debtorEmployer" placeholder="Employer or business">
+            <div class="details-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="debtorAddress">Debtor Address</label>
+                  <input type="text" id="debtorAddress" name="debtorAddress" placeholder="123 Main St, San Antonio, TX">
+                </div>
+                <div class="form-group">
+                  <label for="debtorBank">Known Bank</label>
+                  <input type="text" id="debtorBank" name="debtorBank" placeholder="Frost Bank">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="debtorEmployer">Known Employer</label>
+                  <input type="text" id="debtorEmployer" name="debtorEmployer" placeholder="Employer or business">
+                </div>
+                <div class="form-group">
+                  <label for="judgmentPdf">Judgment PDF</label>
+                  <input type="file" id="judgmentPdf" name="judgmentPdf" accept=".pdf">
+                  <span class="file-hint">No PDF yet? Start with the case number.</span>
+                </div>
+              </div>
+
+              <div class="form-group form-group-last">
+                <label for="knownInformation">Anything Else You Know</label>
+                <textarea id="knownInformation" name="knownInformation" rows="4" placeholder="Bank, address history, property, business information, payment history, or anything else that may help recovery."></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="judgmentPdf">Judgment PDF (Optional)</label>
-              <input type="file" id="judgmentPdf" name="judgmentPdf" accept=".pdf">
-              <span class="file-hint">No PDF yet? Start with the case number.</span>
-            </div>
-          </div>
+          </details>
 
-          <div class="form-group">
-            <label for="knownInformation">Anything Else You Know</label>
-            <textarea id="knownInformation" name="knownInformation" rows="4" placeholder="Bank, address history, property, business information, payment history, or anything else that may help recovery."></textarea>
-          </div>
+          <p class="submit-note">By submitting, you are asking us to review your judgment. There is no fee to submit. If we want to move forward, we send the agreement for your review first.</p>
 
-          <div class="terms-box">
-            <label class="checkbox-container">
-              <input type="checkbox" required>
-              <span>I agree to review the 30% contingency fee agreement and authorize an attorney-supervised recovery review.</span>
-            </label>
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="submitBtn">Send for Review</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Send for Free Review</button>
         </form>
 
         <div id="successMessage" class="success-message hidden">
@@ -257,7 +259,11 @@
       <div class="faq-grid">
         <article class="faq-item">
           <h3>What do you charge?</h3>
-          <p>The current done-for-you fee is 30% of recovered funds. If no money is recovered, there is no recovery fee.</p>
+          <p>There is no fee to submit your judgment for review. If we decide to take the case, the standard done-for-you fee is 30% of money recovered. If no money is recovered, there is no recovery fee.</p>
+        </article>
+        <article class="faq-item">
+          <h3>Am I signing anything when I submit?</h3>
+          <p>No. Submitting the form only asks us to review the judgment. If the file looks like a fit, we send the agreement for your review before anything moves forward.</p>
         </article>
         <article class="faq-item">
           <h3>Do I pay filing and recovery costs up front?</h3>

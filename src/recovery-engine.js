@@ -147,12 +147,12 @@ function buildCustomerCopy(caseRecord) {
       displayState: STATE_LABELS[currentState],
       label: 'Looks like a fit',
       headline: 'Your judgment looks like a fit.',
-      nextStep: 'Next step: we send the agreement and start moving the file forward.',
+      nextStep: 'Next step: we send the agreement for your review. If you want to move forward, you sign it first.',
       reasons: [],
       summaryBullets: [
-        feeLine,
-        'No upfront recovery fee.',
-        'You can follow the case from review to payment.',
+        'No fee to submit and no upfront recovery fee.',
+        `${feeLine.replace('Current fee: ', 'Standard fee if you move forward: ')}`,
+        'Nothing moves forward until you review the agreement.',
       ],
     };
   }

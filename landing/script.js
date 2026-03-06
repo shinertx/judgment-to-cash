@@ -75,7 +75,7 @@ intakeForm.addEventListener('submit', async (event) => {
     console.error(error);
     alert('We could not submit your judgment intake. Please try again in a moment.');
     submitBtn.disabled = false;
-    submitBtn.innerText = 'Send for Review';
+    submitBtn.innerText = 'Send for Free Review';
   }
 });
 

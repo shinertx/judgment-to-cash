@@ -181,6 +181,7 @@ h3 {
 .form-intro,
 .mini-note,
 .step p,
+.submit-note,
 .detail-list li,
 .support-card p,
 .faq-item p,
@@ -260,6 +261,48 @@ h3 {
 
 .mini-note strong {
   color: var(--text);
+}
+
+.extra-details {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  margin: 0.25rem 0 1rem;
+  overflow: hidden;
+}
+
+.extra-details summary {
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.96rem;
+  font-weight: 600;
+  list-style: none;
+  padding: 1rem 1rem 0.95rem;
+}
+
+.extra-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.extra-details summary::after {
+  color: var(--accent);
+  content: '+';
+  float: right;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.extra-details[open] summary::after {
+  content: '−';
+}
+
+.details-body {
+  border-top: 1px solid var(--line);
+  padding: 1rem 1rem 0.1rem;
+}
+
+.form-group-last {
+  margin-bottom: 0.9rem;
 }
 
 .btn {
@@ -346,21 +389,11 @@ input[readonly] {
   margin-top: 0.35rem;
 }
 
-.terms-box {
+.submit-note {
   border-top: 1px solid var(--line);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   margin: 1rem 0 1.25rem;
   padding-top: 1rem;
-}
-
-.checkbox-container {
-  align-items: start;
-  display: flex;
-  gap: 0.75rem;
-}
-
-.checkbox-container input {
-  margin-top: 0.2rem;
 }
 
 .success-badge {
