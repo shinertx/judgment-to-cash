@@ -33,6 +33,6 @@ document.getElementById('intake-form').addEventListener('submit', async (e) => {
         console.error(err);
         alert('We could not submit your judgment intake. Please try again in a moment.');
         submitBtn.disabled = false;
-        submitBtn.innerText = 'Start Recovery Review';
+        submitBtn.innerText = 'Send for Review';
     }
 });
