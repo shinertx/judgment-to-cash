@@ -6,7 +6,7 @@ document.getElementById('intake-form').addEventListener('submit', async (e) => {
 
     // Update button state
     submitBtn.disabled = true;
-    submitBtn.innerText = 'Authorizing...';
+    submitBtn.innerText = 'Starting Review...';
 
     try {
         const formData = new FormData(form);
@@ -31,8 +31,8 @@ document.getElementById('intake-form').addEventListener('submit', async (e) => {
 
     } catch (err) {
         console.error(err);
-        alert('Oops! Something went wrong connecting to the backend. Is it running?');
+        alert('We could not submit your judgment intake. Please try again in a moment.');
         submitBtn.disabled = false;
-        submitBtn.innerText = 'E-Sign & Submit';
+        submitBtn.innerText = 'Start Recovery Review';
     }
 });
