@@ -129,13 +129,15 @@ function buildNeedsInfoList(intake) {
 function buildDecision(intake, now = new Date()) {
   const hardFailReasons = [];
   const softSignals = [];
+  let manualReviewRequired = false;
 
   if (!intake.finalJudgmentConfirmed) {
     hardFailReasons.push('Only final judgments qualify right now.');
   }
 
   if (!intake.defaultJudgmentConfirmed) {
-    hardFailReasons.push('The current workflow is limited to default or uncontested judgments.');
+    manualReviewRequired = true;
+    softSignals.push('Judgment type needs manual review');
   }
 
   if (!intake.caseNumber) {
@@ -233,7 +235,15 @@ function buildDecision(intake, now = new Date()) {
   let nextStep = 'We reviewed the file against the current recovery criteria and cannot move it forward as submitted.';
 
   if (!hardFailReasons.length) {
-    if (score >= 55) {
+    if (manualReviewRequired) {
+      decision = 'needs_more_info';
+      approvalTier = 'C';
+      currentState = 'Reviewing';
+      label = 'Needs manual review';
+      headline = 'Your judgment needs manual review before we can be sure.';
+      nextStep =
+        'Next step: we review the judgment type and decide whether it can move into recovery. There is still no upfront recovery fee during review.';
+    } else if (score >= 55) {
       decision = 'approved';
       approvalTier = score >= 75 ? 'A' : 'B';
       currentState = 'Approved';
@@ -254,7 +264,9 @@ function buildDecision(intake, now = new Date()) {
 
   const reasons = hardFailReasons.length
     ? hardFailReasons
-    : decision === 'needs_more_info'
+    : manualReviewRequired
+      ? ['This judgment may still be a fit, but it is outside the fastest default-judgment workflow and needs manual review.']
+      : decision === 'needs_more_info'
       ? needsInfo.map((item) => `Helpful detail: ${item}.`)
       : softSignals;
 
@@ -265,11 +277,17 @@ function buildDecision(intake, now = new Date()) {
     summaryBullets.push('Approved files move into partner review without upfront recovery costs.');
     summaryBullets.push('You can track the file from review to payment.');
   } else if (decision === 'needs_more_info') {
-    summaryBullets.push('We need a few more details before approving the file.');
-    if (needsInfo.length) {
-      summaryBullets.push(`Most helpful next details: ${needsInfo.join(', ')}.`);
+    if (manualReviewRequired) {
+      summaryBullets.push('This file needs manual review before we decide whether to move it into recovery.');
+      summaryBullets.push('There is still no upfront recovery fee during review.');
+      summaryBullets.push('We will use the judgment type and the rest of the file to decide the next step.');
+    } else {
+      summaryBullets.push('We need a few more details before approving the file.');
+      if (needsInfo.length) {
+        summaryBullets.push(`Most helpful next details: ${needsInfo.join(', ')}.`);
+      }
+      summaryBullets.push('There is still no upfront recovery fee during review.');
     }
-    summaryBullets.push('There is still no upfront recovery fee during review.');
   } else {
     summaryBullets.push('This file is outside the current recovery criteria.');
     summaryBullets.push('We focus on final unpaid Bexar County default judgments.');

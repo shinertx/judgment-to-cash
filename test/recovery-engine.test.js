@@ -81,3 +81,30 @@ test('non-final judgments are declined', () => {
   assert.equal(decision.currentState, 'Closed');
   assert.ok(decision.reasons.some((reason) => reason.includes('final judgments')));
 });
+
+test('non-default judgments can move to manual review instead of hard decline', () => {
+  const decision = buildDecision(
+    {
+      plaintiffName: 'Jane Smith',
+      contactEmail: 'jane@example.com',
+      defendantName: 'Doe LLC',
+      caseNumber: '2026-CV-10004',
+      county: 'Bexar County',
+      judgmentAmount: 250000,
+      judgmentDate: new Date('2025-03-01T00:00:00Z'),
+      finalJudgmentConfirmed: true,
+      defaultJudgmentConfirmed: false,
+      debtorAddress: '123 Main St',
+      debtorBank: 'Frost Bank',
+      debtorEmployer: 'Builder Co',
+      knownInformation: '',
+      uploadedFileName: 'judgment.pdf',
+    },
+    fixedNow
+  );
+
+  assert.equal(decision.decision, 'needs_more_info');
+  assert.equal(decision.currentState, 'Reviewing');
+  assert.equal(decision.label, 'Needs manual review');
+  assert.ok(decision.reasons.some((reason) => reason.includes('manual review')));
+});
