@@ -130,6 +130,8 @@ function buildDecision(intake, now = new Date()) {
   const hardFailReasons = [];
   const softSignals = [];
   let manualReviewRequired = false;
+  const judgmentDate =
+    intake.judgmentDate instanceof Date ? intake.judgmentDate : parseDate(intake.judgmentDate);
 
   if (!intake.finalJudgmentConfirmed) {
     hardFailReasons.push('Only final judgments qualify right now.');
@@ -166,8 +168,8 @@ function buildDecision(intake, now = new Date()) {
     );
   }
 
-  if (intake.judgmentDate) {
-    const ageYears = yearsBetween(now, intake.judgmentDate);
+  if (judgmentDate) {
+    const ageYears = yearsBetween(now, judgmentDate);
     if (ageYears > 10) {
       hardFailReasons.push('The judgment appears outside the current enforcement window.');
     }
@@ -185,8 +187,8 @@ function buildDecision(intake, now = new Date()) {
     }
   }
 
-  if (intake.judgmentDate) {
-    const ageYears = yearsBetween(now, intake.judgmentDate);
+  if (judgmentDate) {
+    const ageYears = yearsBetween(now, judgmentDate);
     if (ageYears <= 1) {
       score += 20;
     } else if (ageYears <= 3) {

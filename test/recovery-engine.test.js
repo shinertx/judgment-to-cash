@@ -108,3 +108,28 @@ test('non-default judgments can move to manual review instead of hard decline', 
   assert.equal(decision.label, 'Needs manual review');
   assert.ok(decision.reasons.some((reason) => reason.includes('manual review')));
 });
+
+test('string judgment dates still score correctly for persisted cases', () => {
+  const decision = buildDecision(
+    {
+      plaintiffName: 'Jane Smith',
+      contactEmail: 'jane@example.com',
+      defendantName: 'Doe LLC',
+      caseNumber: '2026-CV-10005',
+      county: 'Bexar County',
+      judgmentAmount: 48000,
+      judgmentDate: '2025-03-01T00:00:00.000Z',
+      finalJudgmentConfirmed: true,
+      defaultJudgmentConfirmed: true,
+      debtorAddress: '123 Main St',
+      debtorBank: 'Frost Bank',
+      debtorEmployer: '',
+      knownInformation: '',
+      uploadedFileName: null,
+    },
+    fixedNow
+  );
+
+  assert.equal(decision.decision, 'approved');
+  assert.equal(decision.currentState, 'Approved');
+});
