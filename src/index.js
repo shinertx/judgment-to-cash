@@ -54,12 +54,13 @@ function createApp(options = {}) {
       now: now(),
       uploadedFileName: req.file ? req.file.filename : null,
     });
+    const caseResponse = buildCaseResponse(caseRecord);
 
     store.addCase(caseRecord);
 
     res.status(201).json({
-      message: caseRecord.evaluation.headline,
-      case: buildCaseResponse(caseRecord),
+      message: caseResponse.headline,
+      case: caseResponse,
     });
   });
 
