@@ -6,7 +6,7 @@ document.getElementById('intake-form').addEventListener('submit', async (e) => {
 
     // Update button state
     submitBtn.disabled = true;
-    submitBtn.innerText = 'Starting Review...';
+    submitBtn.innerText = 'Sending...';
 
     try {
         const formData = new FormData(form);
@@ -27,8 +27,6 @@ document.getElementById('intake-form').addEventListener('submit', async (e) => {
         form.classList.add('hidden');
         const successMsg = document.getElementById('successMessage');
         successMsg.classList.remove('hidden');
-        successMsg.classList.add('fade-up');
-
     } catch (err) {
         console.error(err);
         alert('We could not submit your judgment intake. Please try again in a moment.');
