@@ -36,6 +36,7 @@ test('POST /api/intake returns a structured approved case response', async (t) =
 
   assert.equal(response.status, 201);
   assert.equal(body.case.currentState, 'Approved');
+  assert.equal(body.case.displayState, 'Looks like a fit');
   assert.equal(body.case.decision, 'approved');
   assert.equal(body.case.feeModel.contingencyRate, 0.3);
   assert.ok(Array.isArray(body.case.timeline));

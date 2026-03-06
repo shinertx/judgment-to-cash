@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { buildDecision, createCaseRecord } = require('../src/recovery-engine');
+const { buildCaseResponse, buildDecision, createCaseRecord } = require('../src/recovery-engine');
 
 const fixedNow = new Date('2026-03-06T00:00:00Z');
 
@@ -28,6 +28,33 @@ test('approved judgment gets an approved decision and fee summary', () => {
   assert.equal(caseRecord.evaluation.decision, 'approved');
   assert.equal(caseRecord.feeModel.contingencyRate, 0.3);
   assert.ok(caseRecord.evaluation.score >= 55);
+});
+
+test('approved case response uses plain-English customer copy', () => {
+  const caseRecord = createCaseRecord(
+    {
+      plaintiffName: 'Jane Smith',
+      contactEmail: 'jane@example.com',
+      defendantName: 'Doe LLC',
+      caseNumber: '2026-CV-10001',
+      county: 'Bexar County',
+      judgmentAmount: '48000',
+      judgmentDate: '2025-06-01',
+      finalJudgmentConfirmed: 'yes',
+      defaultJudgmentConfirmed: 'yes',
+      debtorAddress: '123 Main St, San Antonio, TX',
+      debtorBank: 'Frost Bank',
+      knownInformation: 'Plaintiff knows where the debtor banks.',
+    },
+    { now: fixedNow }
+  );
+
+  const response = buildCaseResponse(caseRecord);
+
+  assert.equal(response.displayState, 'Looks like a fit');
+  assert.equal(response.label, 'Looks like a fit');
+  assert.equal(response.headline, 'Your judgment looks like a fit.');
+  assert.ok(response.timeline.every((step) => typeof step.label === 'string'));
 });
 
 test('missing debtor details can stay in reviewing instead of declining', () => {
@@ -105,8 +132,8 @@ test('non-default judgments can move to manual review instead of hard decline', 
 
   assert.equal(decision.decision, 'needs_more_info');
   assert.equal(decision.currentState, 'Reviewing');
-  assert.equal(decision.label, 'Needs manual review');
-  assert.ok(decision.reasons.some((reason) => reason.includes('manual review')));
+  assert.equal(decision.label, 'In review');
+  assert.ok(decision.reasons.some((reason) => reason.includes('taking a closer look')));
 });
 
 test('string judgment dates still score correctly for persisted cases', () => {

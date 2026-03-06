@@ -15,6 +15,15 @@ const PLATFORM_CONFIG = {
   visibleStates: ['Received', 'Reviewing', 'Approved', 'In Recovery', 'Paid', 'Closed'],
 };
 
+const STATE_LABELS = {
+  Received: 'Submitted',
+  Reviewing: 'In review',
+  Approved: 'Looks like a fit',
+  'In Recovery': 'Recovery in progress',
+  Paid: 'Paid',
+  Closed: 'Not a fit',
+};
+
 function cleanText(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -99,9 +108,143 @@ function buildTimeline(currentState) {
 
   return order.map((state, index) => ({
     state,
+    label: STATE_LABELS[state] || state,
     completed: currentIndex >= index && currentIndex !== -1,
     current: state === currentState,
   }));
+}
+
+function simplifyReason(reason) {
+  if (!reason) {
+    return reason;
+  }
+
+  const replacements = new Map([
+    ['Only final judgments qualify right now.', 'We only handle final judgments right now.'],
+    ['Only Bexar County judgments qualify right now.', 'We only handle Bexar County judgments right now.'],
+    ['A case number is required.', 'We need the case number.'],
+    ['The debtor name is required.', 'We need the name of the person or business that owes you money.'],
+    ['A contact email is required.', 'We need your email address.'],
+    ['The judgment appears outside the current enforcement window.', 'This judgment appears to be too old for our current program.'],
+  ]);
+
+  return replacements.get(reason) || reason;
+}
+
+function formatFeeLine(feeModel) {
+  const rate = Math.round((feeModel?.contingencyRate || 0) * 100);
+  return `Current fee: ${rate}% of money recovered.`;
+}
+
+function buildCustomerCopy(caseRecord) {
+  const feeLine = formatFeeLine(caseRecord.feeModel);
+  const currentState = caseRecord.currentState;
+  const needsManualReview = currentState === 'Reviewing' && !caseRecord.intake.defaultJudgmentConfirmed;
+  const needsMoreInfo = currentState === 'Reviewing' && caseRecord.intake.defaultJudgmentConfirmed;
+
+  if (currentState === 'Approved') {
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'Looks like a fit',
+      headline: 'Your judgment looks like a fit.',
+      nextStep: 'Next step: we send the agreement and start moving the file forward.',
+      reasons: [],
+      summaryBullets: [
+        feeLine,
+        'No upfront recovery fee.',
+        'You can follow the case from review to payment.',
+      ],
+    };
+  }
+
+  if (needsManualReview) {
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'In review',
+      headline: 'We received your judgment and we are reviewing it now.',
+      nextStep: 'We are taking a closer look before deciding the next step. If we need anything else, we will reach out.',
+      reasons: ['We are reviewing the file now.'],
+      summaryBullets: [
+        'There is no upfront recovery fee during review.',
+        'We will tell you the next step after review.',
+        'If we need anything else, we will contact you.',
+      ],
+    };
+  }
+
+  if (needsMoreInfo) {
+    const evaluationReasons = Array.isArray(caseRecord.evaluation.reasons)
+      ? caseRecord.evaluation.reasons.map((reason) => reason.replace('Helpful detail: ', '').replace(/\.$/, ''))
+      : [];
+
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'In review',
+      headline: 'We received your judgment and need a little more information.',
+      nextStep: 'We may reach out for a few more details before deciding the next step.',
+      reasons: evaluationReasons,
+      summaryBullets: [
+        'There is no upfront recovery fee during review.',
+        evaluationReasons.length
+          ? `Most helpful details next: ${evaluationReasons.join(', ')}.`
+          : 'We may need a few more details before moving forward.',
+        'We will tell you the next step after review.',
+      ],
+    };
+  }
+
+  if (currentState === 'In Recovery') {
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'Recovery in progress',
+      headline: 'Your recovery is in progress.',
+      nextStep: 'We are moving the file forward and will keep you updated as it progresses.',
+      reasons: [],
+      summaryBullets: [
+        feeLine,
+        'No upfront recovery fee.',
+        'You can follow the case as it moves toward payment.',
+      ],
+    };
+  }
+
+  if (currentState === 'Paid') {
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'Paid',
+      headline: 'Money has been recovered on this case.',
+      nextStep: 'We will show payment details here as the file closes out.',
+      reasons: [],
+      summaryBullets: [
+        feeLine,
+        'Payment has been recorded on this file.',
+      ],
+    };
+  }
+
+  if (currentState === 'Closed') {
+    const reasons = Array.isArray(caseRecord.evaluation.reasons)
+      ? caseRecord.evaluation.reasons.map(simplifyReason)
+      : [];
+
+    return {
+      displayState: STATE_LABELS[currentState],
+      label: 'Not a fit right now',
+      headline: 'This judgment is not a fit for our current program.',
+      nextStep: 'We cannot move this file forward as submitted.',
+      reasons,
+      summaryBullets: reasons.length ? reasons : ['This file is outside our current program.'],
+    };
+  }
+
+  return {
+    displayState: STATE_LABELS[currentState] || currentState,
+    label: STATE_LABELS[currentState] || currentState,
+    headline: 'We received your judgment.',
+    nextStep: 'We are reviewing the file now.',
+    reasons: [],
+    summaryBullets: ['We will update you as the file moves forward.'],
+  };
 }
 
 function buildNeedsInfoList(intake) {
@@ -241,33 +384,33 @@ function buildDecision(intake, now = new Date()) {
       decision = 'needs_more_info';
       approvalTier = 'C';
       currentState = 'Reviewing';
-      label = 'Needs manual review';
-      headline = 'Your judgment needs manual review before we can be sure.';
+      label = 'In review';
+      headline = 'We received your judgment and we are reviewing it now.';
       nextStep =
-        'Next step: we review the judgment type and decide whether it can move into recovery. There is still no upfront recovery fee during review.';
+        'We are taking a closer look before deciding the next step. If we need anything else, we will reach out.';
     } else if (score >= 55) {
       decision = 'approved';
       approvalTier = score >= 75 ? 'A' : 'B';
       currentState = 'Approved';
-      label = 'Approved for recovery review';
-      headline = 'Your judgment looks like a fit for recovery review.';
+      label = 'Looks like a fit';
+      headline = 'Your judgment looks like a fit.';
       nextStep =
-        'Next step: agreement review and same-day partner handoff when the file is ready. Recovery timing still depends on court process and debtor assets.';
+        'Next step: we send the agreement and start moving the file forward.';
     } else {
       decision = 'needs_more_info';
       approvalTier = 'C';
       currentState = 'Reviewing';
-      label = 'Needs more information';
-      headline = 'We need a little more information before we can decide.';
+      label = 'In review';
+      headline = 'We received your judgment and need a little more information.';
       nextStep =
-        'Next step: we review the additional debtor details and decide whether the judgment is strong enough to move forward.';
+        'We may reach out for a few more details before deciding the next step.';
     }
   }
 
   const reasons = hardFailReasons.length
     ? hardFailReasons
     : manualReviewRequired
-      ? ['This judgment may still be a fit, but it is outside the fastest default-judgment workflow and needs manual review.']
+      ? ['We are taking a closer look before deciding the next step.']
       : decision === 'needs_more_info'
       ? needsInfo.map((item) => `Helpful detail: ${item}.`)
       : softSignals;
@@ -275,23 +418,23 @@ function buildDecision(intake, now = new Date()) {
   const summaryBullets = [];
 
   if (decision === 'approved') {
-    summaryBullets.push('Current fee: 30% of recovered funds.');
-    summaryBullets.push('Approved files move into partner review without upfront recovery costs.');
-    summaryBullets.push('You can track the file from review to payment.');
+    summaryBullets.push('Current fee: 30% of money recovered.');
+    summaryBullets.push('No upfront recovery fee.');
+    summaryBullets.push('You can follow the case from review to payment.');
   } else if (decision === 'needs_more_info') {
     if (manualReviewRequired) {
-      summaryBullets.push('This file needs manual review before we decide whether to move it into recovery.');
-      summaryBullets.push('There is still no upfront recovery fee during review.');
-      summaryBullets.push('We will use the judgment type and the rest of the file to decide the next step.');
+      summaryBullets.push('There is no upfront recovery fee during review.');
+      summaryBullets.push('We will tell you the next step after review.');
+      summaryBullets.push('If we need anything else, we will contact you.');
     } else {
-      summaryBullets.push('We need a few more details before approving the file.');
+      summaryBullets.push('There is no upfront recovery fee during review.');
       if (needsInfo.length) {
-        summaryBullets.push(`Most helpful next details: ${needsInfo.join(', ')}.`);
+        summaryBullets.push(`Most helpful details next: ${needsInfo.join(', ')}.`);
       }
-      summaryBullets.push('There is still no upfront recovery fee during review.');
+      summaryBullets.push('We will tell you the next step after review.');
     }
   } else {
-    summaryBullets.push('This file is outside the current recovery criteria.');
+    summaryBullets.push('This file is outside our current program.');
     summaryBullets.push('We focus on final unpaid Bexar County default judgments.');
   }
 
@@ -327,9 +470,12 @@ function createCaseRecord(input, options = {}) {
 }
 
 function buildCaseResponse(caseRecord) {
+  const customerCopy = buildCustomerCopy(caseRecord);
+
   return {
     id: caseRecord.id,
     currentState: caseRecord.currentState,
+    displayState: customerCopy.displayState,
     createdAt: caseRecord.createdAt,
     plaintiffName: caseRecord.intake.plaintiffName,
     defendantName: caseRecord.intake.defendantName,
@@ -339,14 +485,14 @@ function buildCaseResponse(caseRecord) {
     decision: caseRecord.evaluation.decision,
     approvalTier: caseRecord.evaluation.approvalTier,
     score: caseRecord.evaluation.score,
-    label: caseRecord.evaluation.label,
-    headline: caseRecord.evaluation.headline,
-    nextStep: caseRecord.evaluation.nextStep,
-    reasons: caseRecord.evaluation.reasons,
+    label: customerCopy.label,
+    headline: customerCopy.headline,
+    nextStep: customerCopy.nextStep,
+    reasons: customerCopy.reasons,
     recommendedPath: caseRecord.evaluation.recommendedPath,
-    summaryBullets: caseRecord.evaluation.summaryBullets,
+    summaryBullets: customerCopy.summaryBullets,
     feeModel: caseRecord.feeModel,
-    timeline: caseRecord.timeline,
+    timeline: buildTimeline(caseRecord.currentState),
   };
 }
 

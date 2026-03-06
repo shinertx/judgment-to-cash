@@ -21,7 +21,7 @@ function renderTimeline(target, timeline) {
       li.classList.add('timeline-item-complete');
     }
 
-    li.innerHTML = `<span>${step.state}</span>`;
+    li.innerHTML = `<span>${step.label || step.state}</span>`;
     target.appendChild(li);
   });
 }
@@ -109,7 +109,7 @@ lookupForm.addEventListener('submit', async (event) => {
     const caseResult = data.case;
     const lookupResult = document.getElementById('lookupResult');
 
-    document.getElementById('lookupState').innerText = caseResult.currentState;
+    document.getElementById('lookupState').innerText = caseResult.displayState || caseResult.currentState;
     document.getElementById('lookupHeadline').innerText = caseResult.headline;
     document.getElementById('lookupCaseLabel').innerText = `Case ID: ${caseResult.id}`;
     document.getElementById('lookupNextStep').innerText = caseResult.nextStep;
