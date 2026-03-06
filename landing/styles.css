@@ -118,6 +118,19 @@ h2 {
   padding: 2rem;
 }
 
+.mini-note {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  font-size: 0.94rem;
+  margin: 1.25rem 0 1.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.mini-note strong {
+  color: var(--text);
+}
+
 .eyebrow {
   color: var(--accent);
   font-size: 0.8rem;
@@ -144,9 +157,11 @@ h2 {
 
 .hero-lead,
 .form-intro,
+.mini-note,
 .step p,
 .file-hint,
 .terms-box,
+.contrast-card p,
 .site-footer,
 .success-message p {
   color: var(--text-soft);
@@ -301,6 +316,34 @@ input[type="file"]:focus {
   display: none;
 }
 
+.contrast-band {
+  padding: 0 0 2rem;
+}
+
+.contrast-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.contrast-card {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.contrast-card h2 {
+  font-size: 1.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.contrast-card-strong {
+  background: #f1f7f4;
+  border-color: rgba(30, 90, 80, 0.14);
+}
+
 .site-footer {
   padding: 0 0 2rem;
 }
@@ -314,7 +357,8 @@ input[type="file"]:focus {
 }
 
 @media (max-width: 900px) {
-  .hero-grid {
+  .hero-grid,
+  .contrast-grid {
     grid-template-columns: 1fr;
   }
 
