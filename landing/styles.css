@@ -1,13 +1,13 @@
 :root {
-  --bg: #f4efe7;
-  --surface: rgba(255, 252, 247, 0.92);
+  --bg: #f5f0e8;
+  --surface: rgba(255, 252, 247, 0.94);
   --surface-strong: #fffdf8;
   --text: #18211f;
   --text-soft: #556460;
   --line: rgba(24, 33, 31, 0.12);
   --accent: #1e5a50;
   --accent-dark: #15453d;
-  --accent-soft: #e0ebe7;
+  --accent-soft: #dfebe7;
   --shadow: 0 24px 48px rgba(24, 33, 31, 0.08);
   --radius-lg: 28px;
   --radius-md: 18px;
@@ -27,11 +27,10 @@ html {
 body {
   background:
     radial-gradient(circle at top left, rgba(30, 90, 80, 0.08), transparent 24%),
-    linear-gradient(180deg, #faf6ef 0%, var(--bg) 100%);
+    linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
   color: var(--text);
   font-family: 'Public Sans', sans-serif;
   line-height: 1.6;
-  min-height: 100vh;
 }
 
 .container {
@@ -74,7 +73,8 @@ body {
 
 .brand-text,
 h1,
-h2 {
+h2,
+h3 {
   font-family: 'Fraunces', serif;
 }
 
@@ -92,20 +92,27 @@ h2 {
 }
 
 .hero {
-  padding: 3rem 0 4rem;
+  padding: 3rem 0 2rem;
+}
+
+.hero-grid,
+.support-grid,
+.faq-grid {
+  display: grid;
+  gap: 1.5rem;
 }
 
 .hero-grid {
   align-items: start;
-  display: grid;
-  gap: 2rem;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
 }
 
 .hero-copy,
-.form-panel {
+.form-panel,
+.support-card,
+.faq-item {
   background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
 }
@@ -114,21 +121,10 @@ h2 {
   padding: 3rem;
 }
 
-.form-panel {
-  padding: 2rem;
-}
-
-.mini-note {
-  background: var(--surface-strong);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  font-size: 0.94rem;
-  margin: 1.25rem 0 1.5rem;
-  padding: 0.9rem 1rem;
-}
-
-.mini-note strong {
-  color: var(--text);
+.form-panel,
+.support-card,
+.faq-item {
+  padding: 1.6rem;
 }
 
 .eyebrow {
@@ -141,27 +137,37 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-size: clamp(3rem, 6vw, 5.1rem);
   font-weight: 700;
   letter-spacing: -0.05em;
-  line-height: 0.95;
+  line-height: 0.94;
   margin-bottom: 1rem;
-  max-width: 10ch;
+  max-width: 9ch;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
 }
 
 .hero-lead,
 .form-intro,
 .mini-note,
 .step p,
+.detail-list li,
+.support-card p,
+.faq-item p,
 .file-hint,
 .terms-box,
-.contrast-card p,
 .site-footer,
 .success-message p {
   color: var(--text-soft);
@@ -220,7 +226,21 @@ h2 {
 }
 
 .step h2 {
+  font-size: 1.15rem;
   margin-bottom: 0.2rem;
+}
+
+.mini-note {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  font-size: 0.94rem;
+  margin: 1.2rem 0 1.4rem;
+  padding: 0.9rem 1rem;
+}
+
+.mini-note strong {
+  color: var(--text);
 }
 
 .btn {
@@ -316,32 +336,49 @@ input[type="file"]:focus {
   display: none;
 }
 
-.contrast-band {
+.section {
   padding: 0 0 2rem;
 }
 
-.contrast-grid {
-  display: grid;
-  gap: 1rem;
+.support-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.contrast-card {
-  background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-}
-
-.contrast-card h2 {
-  font-size: 1.45rem;
-  margin-bottom: 0.45rem;
-}
-
-.contrast-card-strong {
+.support-card-contrast {
   background: #f1f7f4;
   border-color: rgba(30, 90, 80, 0.14);
+}
+
+.detail-list {
+  display: grid;
+  gap: 0.8rem;
+  list-style: none;
+  margin-top: 1rem;
+}
+
+.detail-list li {
+  align-items: start;
+  display: flex;
+  gap: 0.65rem;
+}
+
+.detail-list li::before {
+  color: var(--accent);
+  content: '—';
+  font-weight: 700;
+}
+
+.faq-section {
+  padding-bottom: 2rem;
+}
+
+.section-head {
+  margin-bottom: 1.25rem;
+  max-width: 700px;
+}
+
+.faq-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .site-footer {
@@ -358,12 +395,15 @@ input[type="file"]:focus {
 
 @media (max-width: 900px) {
   .hero-grid,
-  .contrast-grid {
+  .support-grid,
+  .faq-grid {
     grid-template-columns: 1fr;
   }
 
   .hero-copy,
-  .form-panel {
+  .form-panel,
+  .support-card,
+  .faq-item {
     padding: 1.5rem;
   }
 }
@@ -381,7 +421,7 @@ input[type="file"]:focus {
   }
 
   h1 {
-    max-width: 11ch;
+    max-width: 10ch;
   }
 
   .proof-list {
