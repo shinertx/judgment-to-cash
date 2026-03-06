@@ -160,3 +160,29 @@ test('string judgment dates still score correctly for persisted cases', () => {
   assert.equal(decision.decision, 'approved');
   assert.equal(decision.currentState, 'Approved');
 });
+
+test('reviewing case response stays calm and plain-English for missing details', () => {
+  const caseRecord = createCaseRecord(
+    {
+      plaintiffName: 'Jane Smith',
+      contactEmail: 'jane@example.com',
+      defendantName: 'Doe LLC',
+      caseNumber: '2026-CV-10006',
+      county: 'Bexar County',
+      judgmentAmount: '48000',
+      judgmentDate: '2025-06-01',
+      finalJudgmentConfirmed: 'yes',
+      defaultJudgmentConfirmed: 'yes',
+      debtorAddress: '',
+      debtorBank: '',
+      knownInformation: '',
+    },
+    { now: fixedNow }
+  );
+
+  const response = buildCaseResponse(caseRecord);
+
+  assert.equal(response.displayState, 'In review');
+  assert.equal(response.headline, 'We received your judgment and we are reviewing it now.');
+  assert.equal(response.nextStep, 'We are reviewing the file now. If we need anything else, we will reach out.');
+});

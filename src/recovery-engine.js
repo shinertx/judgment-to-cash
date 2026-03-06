@@ -180,9 +180,9 @@ function buildCustomerCopy(caseRecord) {
     return {
       displayState: STATE_LABELS[currentState],
       label: 'In review',
-      headline: 'We received your judgment and need a little more information.',
-      nextStep: 'We may reach out for a few more details before deciding the next step.',
-      reasons: evaluationReasons,
+      headline: 'We received your judgment and we are reviewing it now.',
+      nextStep: 'We are reviewing the file now. If we need anything else, we will reach out.',
+      reasons: [],
       summaryBullets: [
         'There is no upfront recovery fee during review.',
         evaluationReasons.length
